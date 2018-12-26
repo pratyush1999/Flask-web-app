@@ -1,5 +1,11 @@
  <table>
-        <tr valign="top">
-            <td>{{ post.author.username }} says:<br>{{ post.body }}</td>
-        </tr>
+	<tr valign="top">
+	    <td>{{ post.author.username }} says:<br>{{ post.content }}</td>
+	</tr>
+	<tr valign="top">
+		<td>
+			{% if user == current_user %}
+                <p><a href="{{ url_for('edit_post', post_id=post.id) }}">Edit this post</a></p>
+    {% endif %}
+		</td>
     </table>
