@@ -20,7 +20,7 @@
         </p>
         <p>{{ form.submit() }}</p>
     </form>
-    <form action="{{ url_for('delete_post', post_id=post.id) }}" method="post" enctype="multipart/form-data">
+    <form action="{{ url_for('posts.delete_post', post_id=post.id) }}" method="post" enctype="multipart/form-data">
         <input class="btn btn-danger" type="submit" value="delete">
     </form>
 {% endblock %}
