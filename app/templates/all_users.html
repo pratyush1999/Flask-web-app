@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<br/>
+    {% for user in users %}
+    <a href="{{ url_for('users.message', username=user.username) }}"">{{ user.username}}</a>
+     <p>{{ user.followers.count() }} followers, {{ user.followed.count() }} following.</p>
+     {% if not current_user.is_following(user) %}
+        <p><a href="{{ url_for('users.follow', username=user.username) }}">Follow</a></p>
+        {% else %}
+        <p><a href="{{ url_for('users.unfollow', username=user.username) }}">Unfollow</a></p>
+    {% endif %}
+     {% endfor %}
+{% endblock %}
