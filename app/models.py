@@ -59,6 +59,15 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post {}>'.format(self.content)
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    reciever_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __repr__(self):
+        return '<Post {}>'.format(self.content)
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))

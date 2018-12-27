@@ -1,13 +1,13 @@
 from flask import Blueprint
 from flask_login import current_user, login_user, logout_user, login_required
-from app.users.forms import RegistrationForm, LoginForm, EditProfileForm
+from app.users.forms import RegistrationForm, LoginForm, EditProfileForm, MessageForm
 from flask import  render_template, flash, redirect, url_for
 from flask import request
 from werkzeug.urls import url_parse
 import os
 import secrets
 from app.users.utils import save_picture
-from app.models import User, Post
+from app.models import User, Post, Message
 from app import db
 users = Blueprint('users', __name__)
 
@@ -100,3 +100,23 @@ def unfollow(username):
     db.session.commit()
     flash('You have unfollowed {}.'.format(username))
     return redirect(url_for('users.user', username=username))
+
+@users.route('/all_users')
+@login_required
+def all_users():
+    users = User.query.all()
+    return render_template('all_users.html', users=users)
+
+@users.route('/message/<username>', methods=['GET', 'POST'])
+@login_required
+def message(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    messages=Message.query.filter_by(sender_id=current_user.id).all()
+    form = MessageForm()
+    if form.validate_on_submit():
+        message = Message(content=form.content.data, reciever_id=user.id, sender_id=current_user.id)
+        db.session.add(message)
+        db.session.commit()
+        flash('Your message has been sent.')
+        return redirect(url_for('users.all_users'))
+    return render_template('message.html',form=form,messages=messages)
