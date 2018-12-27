@@ -63,9 +63,9 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    sender_id = db.Column(db.String(64), db.ForeignKey('user.username'))
     reciever_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
+    
     def __repr__(self):
         return '<Post {}>'.format(self.content)
 @login.user_loader

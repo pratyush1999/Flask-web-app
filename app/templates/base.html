@@ -17,6 +17,7 @@
         {% else %}
         <a href="{{ url_for('users.user', username=current_user.username) }}">Profile</a>
           <a href="{{ url_for('posts.new_post') }}">New Post</a>
+        <a href="{{ url_for('users.all_users') }}">list Of Users</a>
         <a href="{{ url_for('users.logout') }}">Logout</a>
         {% endif %}
       {% block content %}{% endblock %}
