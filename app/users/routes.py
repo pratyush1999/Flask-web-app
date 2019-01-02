@@ -113,12 +113,14 @@ def message(username):
     user = User.query.filter_by(username=username).first_or_404()
     form = MessageForm()
     if form.validate_on_submit():
-        message = Message(content=form.content.data, reciever_id=user.id, sender_id=current_user.username)
+        message = Message(content=form.content.data, reciever_id=user.id, sender_id=current_user.id)
         db.session.add(message)
         db.session.commit()
         flash('Your message has been sent.')
         return redirect(url_for('users.all_users'))
-    messages1=Message.query.filter_by(sender_id=username).filter_by(reciever_id=current_user.id)
-    messages2=Message.query.filter_by(sender_id=current_user.username).filter_by(reciever_id=user.id)
+    messages1=Message.query.filter_by(sender_id=user.id).filter_by(reciever_id=current_user.id)
+    messages2=Message.query.filter_by(sender_id=current_user.id).filter_by(reciever_id=user.id)
     messages=messages1.union(messages2).all()
+    for temp_message in messages:
+        temp_message.sender_id=User.query.filter_by(id= temp_message.sender_id).first().username
     return render_template('message.html',form=form,messages=messages)
