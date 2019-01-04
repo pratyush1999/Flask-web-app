@@ -45,3 +45,6 @@ class EditProfileForm(FlaskForm):
 class MessageForm(FlaskForm):
     content = TextAreaField('Content', validators=[DataRequired()])
     submit = SubmitField('Add comment')
+class CreateGroupForm(FlaskForm):
+    name = StringField('Group Name', validators=[DataRequired()])
+    submit = SubmitField('Create Group')

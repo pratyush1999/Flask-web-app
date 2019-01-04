@@ -7,6 +7,10 @@ followers = db.Table('followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
 )
+groupmember = db.Table('groupmember',
+    db.Column('group_id', db.Integer, db.ForeignKey('group.id')),
+    db.Column('member_id', db.Integer, db.ForeignKey('user.id'))
+)
 class User(UserMixin, db.Model):
 	"""docstring for User"""
 	id=db.Column(db.Integer, primary_key=True)
@@ -22,6 +26,7 @@ class User(UserMixin, db.Model):
         primaryjoin=(followers.c.follower_id == id),
         secondaryjoin=(followers.c.followed_id == id),
         backref=db.backref('followers', lazy='dynamic'), lazy='dynamic')
+	member_of=db.relationship('Group', secondary=groupmember, backref=db.backref('members', lazy='dynamic'))
 	def set_password(self, password):
 		self.password_hash = generate_password_hash(password)
 	
@@ -46,10 +51,30 @@ class User(UserMixin, db.Model):
 		own = Post.query.filter_by(user_id=self.id)
 		return followed.union(own).order_by(Post.timestamp.desc())            	
 
-
 	def __repr__(self):
 		return '<User {}>'.format(self.username)  
- 
+class Group(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # group_posts = db.relationship('GroupPost', backref='author', lazy='dynamic')
+
+    def add_member(self, user):
+    	if not self.is_member(user):
+    		self.members.append(user)
+
+    def remove_member(self, user):
+    	if self.is_member(user):
+    		self.members.remove(user)	
+
+    def is_member(self, user):
+    	return self.members.filter(
+    		groupmember.c.member_id == user.id).count()>0
+    
+    def __repr__(self):
+        return '<Group {}>'.format(self.name) 
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
@@ -68,6 +93,14 @@ class Message(db.Model):
     
     def __repr__(self):
         return '<Post {}>'.format(self.content)
+
+# class GroupPost(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     content = db.Column(db.Text)
+#     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+#     sender_id = db.Column(db.Integer , db.ForeignKey('user.id'))
+#     group_id = db.Column(db.Integer , db.ForeignKey('group.id'))      
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))

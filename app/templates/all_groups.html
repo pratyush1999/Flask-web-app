@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<br/>
+    {% for group in groups %}
+    {{ group.name }}
+    {% if group.creator_id == current_user.id %}
+    <a href="{{ url_for('users.add_member', group_id=group.id) }}"> Add/Remove member </a>
+    {% endif %}
+    <br/>
+     {% endfor %}
+{% endblock %}

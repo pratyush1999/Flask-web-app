@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<br/>
+    {% for user in users %}
+    {% if not group.is_member(user) %}
+    <a href="{{ url_for('users.add_groupmember', user_id=user.id, group_id=group.id) }}">Add {{ user.username}}</a>
+    {% else %}
+    <a href="{{ url_for('users.remove_groupmember', user_id=user.id, group_id=group.id) }}">Remove {{ user.username}}</a>
+    {% endif %}
+    <br/>
+    {% endfor %}
+{% endblock %}

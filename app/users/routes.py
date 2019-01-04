@@ -1,13 +1,13 @@
 from flask import Blueprint
 from flask_login import current_user, login_user, logout_user, login_required
-from app.users.forms import RegistrationForm, LoginForm, EditProfileForm, MessageForm
+from app.users.forms import RegistrationForm, LoginForm, EditProfileForm, MessageForm, CreateGroupForm
 from flask import  render_template, flash, redirect, url_for
 from flask import request
 from werkzeug.urls import url_parse
 import os
 import secrets
 from app.users.utils import save_picture
-from app.models import User, Post, Message
+from app.models import User, Post, Message, Group
 from app import db
 users = Blueprint('users', __name__)
 
@@ -124,3 +124,49 @@ def message(username):
     for temp_message in messages:
         temp_message.sender_id=User.query.filter_by(id= temp_message.sender_id).first().username
     return render_template('message.html',form=form,messages=messages)
+
+@users.route('/all_groups', methods=['GET', 'POST'])
+@login_required
+def all_groups():
+    groups=Group.query.all()
+    return render_template('all_groups.html',groups=groups)
+
+@users.route('/create_group', methods=['GET', 'POST'])
+@login_required
+def create_group():
+    form=CreateGroupForm()
+    if form.validate_on_submit():
+        group = Group(name=form.name.data, creator_id=current_user.id)
+        db.session.add(group)
+        db.session.commit()
+        flash('Your group has been created')
+        return redirect(url_for('users.all_groups'))
+    return render_template('create_group.html',form=form)
+
+@users.route('/<int:group_id>/all_users')
+@login_required
+def add_member(group_id):
+    group=Group.query.filter_by(id=group_id).first_or_404()
+    users = User.query.all()
+    return render_template('add_member.html', users=users, group=group)
+
+@users.route('/<int:group_id>/<int:user_id>/remove')
+@login_required
+def remove_groupmember(group_id, user_id):
+    group = Group.query.filter_by(id=group_id).first_or_404()
+    user = User.query.filter_by(id=user_id).first_or_404()
+    if group.creator_id == current_user.id:
+        group.remove_member(user)
+        db.session.commit()
+    return redirect(url_for('users.add_member', group_id=group_id))
+
+@users.route('/<int:group_id>/<int:user_id>/add')
+@login_required
+def add_groupmember(group_id, user_id):
+    group = Group.query.filter_by(id=group_id).first_or_404()
+    user = User.query.filter_by(id=user_id).first_or_404()
+    if group.creator_id == current_user.id:
+        group.add_member(user)
+        db.session.commit()
+    return redirect(url_for('users.add_member', group_id=group_id))
+      
