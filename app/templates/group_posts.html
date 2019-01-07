@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<br/>
+    <a href="{{ url_for('users.add_grouppost', group_id=group_id) }}"> Create Post </a>
+    {% for post in posts %}
+    {{ post.sender_id }}says{{ post.content }}
+    <br/>
+     {% endfor %}
+{% endblock %}
